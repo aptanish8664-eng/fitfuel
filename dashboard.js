@@ -177,6 +177,16 @@ const sections = {
 `
 };
 
+
+
+const SUPABASE_URL = "https://emnvdclqlczohkfwkiph.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbnZkY2xxbGN6b2hrZndraXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyNTk5MDksImV4cCI6MjA4MjgzNTkwOX0._e9EMVtXDEtnRwkN654humZkLV63J5XrL9ZuqndVK6s"; // REPLACE with your Anon Key
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
+
+
+
+
 // ---------- TAB SWITCH ----------
 function switchTab(tab) {
   const display = document.getElementById("display");
@@ -234,14 +244,13 @@ function initHome() {
   }, 0);
 }
 
-function calculateCalories() {
+async function calculateCalories() {
   const goal = document.getElementById("goal").value;
   const gender = document.getElementById("gender").value;
   const age = +document.getElementById("age").value;
   const height = +document.getElementById("height").value;
   const weight = +document.getElementById("weight").value;
   const activity = +document.getElementById("activity").value;
-
   const output = document.getElementById("calorie-result");
 
   if (!goal || !gender || !age || !height || !weight || !activity) {
@@ -249,56 +258,65 @@ function calculateCalories() {
     return;
   }
 
-  let bmr =
-    gender === "male"
+  // BMR Calculation logic remains the same
+  let bmr = gender === "male"
       ? 10 * weight + 6.25 * height - 5 * age + 5
       : 10 * weight + 6.25 * height - 5 * age - 161;
-
   let calories = Math.round(bmr * activity);
   if (goal === "lose") calories -= 400;
   if (goal === "gain") calories += 300;
 
-  const user = sessionStorage.getItem("activeUser");
-  const users = JSON.parse(localStorage.getItem("users")) || {};
-  if (!users[user]) users[user] = {};
-  users[user].profile = { goal, gender, age, height, weight, activity, calories };
-  localStorage.setItem("users", JSON.stringify(users));
+  // --- SUPABASE INTEGRATION ---
+  const { data: { user } } = await supabase.auth.getUser(); // Get current user id
 
-  output.innerHTML = `
-    <div class="p-6 bg-zinc-900 rounded-2xl interactive-card">
-      <p class="text-zinc-400">Daily Calories</p>
-      <p class="text-4xl font-bold text-[#ccff00] racing-number">${calories} kcal</p>
-    </div>
-  `;
-  
-  // Force diet regeneration on calorie/goal change
-  delete users[user].dietPlan;
-  localStorage.setItem("users", JSON.stringify(users));
-  
-  // Trigger racing number animation
-  setTimeout(() => addRacingNumbers(), 100);
-}
+  const { error } = await supabase
+    .from('profiles')
+    .upsert({ 
+      id: user.id, 
+      goal, gender, age, height, weight, activity, calories,
+      updated_at: new Date()
+    });
 
-function restoreProfile() {
-  const user = sessionStorage.getItem("activeUser");
-  const users = JSON.parse(localStorage.getItem("users")) || {};
-  const profile = users[user]?.profile;
-  if (!profile) return;
-
-  document.getElementById("goal").value = profile.goal || "";
-  document.getElementById("gender").value = profile.gender || "";
-  document.getElementById("age").value = profile.age || "";
-  document.getElementById("height").value = profile.height || "";
-  document.getElementById("weight").value = profile.weight || "";
-  document.getElementById("activity").value = profile.activity || "";
-
-  if (profile.calories) {
-    document.getElementById("calorie-result").innerHTML = `
+  if (error) {
+    console.error("Supabase Error:", error);
+    output.innerHTML = `<p class="text-red-500">Error saving data.</p>`;
+  } else {
+    output.innerHTML = `
       <div class="p-6 bg-zinc-900 rounded-2xl interactive-card">
-        <p class="text-zinc-400">Daily Calories</p>
-        <p class="text-4xl font-bold text-[#ccff00] racing-number">${profile.calories} kcal</p>
+        <p class="text-zinc-400">Daily Calories (Synced to Cloud)</p>
+        <p class="text-4xl font-bold text-[#ccff00] racing-number">${calories} kcal</p>
       </div>
     `;
+    addRacingNumbers();
+  }
+}
+
+async function restoreProfile() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (data) {
+    document.getElementById("goal").value = data.goal || "";
+    document.getElementById("gender").value = data.gender || "";
+    document.getElementById("age").value = data.age || "";
+    document.getElementById("height").value = data.height || "";
+    document.getElementById("weight").value = data.weight || "";
+    document.getElementById("activity").value = data.activity || "";
+
+    if (data.calories) {
+      document.getElementById("calorie-result").innerHTML = `
+        <div class="p-6 bg-zinc-900 rounded-2xl interactive-card">
+          <p class="text-zinc-400">Daily Calories</p>
+          <p class="text-4xl font-bold text-[#ccff00] racing-number">${data.calories} kcal</p>
+        </div>
+      `;
+    }
   }
 }
 
