@@ -89,5 +89,28 @@
   <script src="login-particles.js"></script>
   <!-- Original Auth Script -->
   <script src="auth.js"></script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCah1X2nDnED_0y8y_wddI7UCc4nNSdl9k",
+    authDomain: "fitfuel-b7085.firebaseapp.com",
+    projectId: "fitfuel-b7085",
+    storageBucket: "fitfuel-b7085.firebasestorage.app",
+    messagingSenderId: "854780886148",
+    appId: "1:854780886148:web:e17cef32cba0cd7ea6d6d1",
+    measurementId: "G-GHT26SEMJF"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 </html>

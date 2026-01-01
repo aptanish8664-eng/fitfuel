@@ -75,6 +75,8 @@ app.get("/landing-script.js", (req, res) => {
   res.sendFile(path.join(__dirname, "landing-script.js"));
 });
 
+
+
 app.listen(3000, () => {
   console.log("✅ Backend running on http://localhost:3000");
 });

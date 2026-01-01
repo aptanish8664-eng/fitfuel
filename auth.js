@@ -1,54 +1,58 @@
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+const auth = getAuth();
 let mode = "login";
 
+// UI Toggle remains mostly the same
 function toggleMode() {
   mode = mode === "login" ? "signup" : "login";
-
-  document.querySelector("button").innerText =
-    mode === "login" ? "Login" : "Create Account";
-
-  document.querySelector("p button").innerText =
-    mode === "login" ? "Sign up" : "Back to login";
-
+  document.querySelector("button").innerText = mode === "login" ? "Login" : "Create Account";
+  document.querySelector("p button").innerText = mode === "login" ? "Sign up" : "Back to login";
   document.getElementById("error").innerText = "";
 }
 
-function login() {
+async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const error = document.getElementById("error");
+  const errorElement = document.getElementById("error");
 
   if (!email || !password) {
-    error.innerText = "Fill all fields.";
+    errorElement.innerText = "Fill all fields.";
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem("users")) || {};
-
-  if (mode === "signup") {
-    if (users[email]) {
-      error.innerText = "Account already exists.";
-      return;
+  try {
+    if (mode === "signup") {
+      // Create new user in Firebase
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Signup successful");
+    } else {
+      // Sign in existing user
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login successful");
     }
-
-    users[email] = {
-      password,
-      profile: {},
-      report: null
-    };
-
-    localStorage.setItem("users", JSON.stringify(users));
-    sessionStorage.setItem("activeUser", email);
-
+    
+    // Firebase handles session automatically, redirect now
     window.location.href = "dashboard.html";
-    return;
-  }
 
-  // login mode
-  if (!users[email] || users[email].password !== password) {
-    error.innerText = "Invalid email or password.";
-    return;
+  } catch (error) {
+    // Map Firebase error codes to user-friendly messages
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        errorElement.innerText = "Account already exists.";
+        break;
+      case 'auth/invalid-credential':
+        errorElement.innerText = "Invalid email or password.";
+        break;
+      case 'auth/weak-password':
+        errorElement.innerText = "Password should be at least 6 characters.";
+        break;
+      default:
+        errorElement.innerText = error.message;
+    }
   }
-
-  sessionStorage.setItem("activeUser", email);
-  window.location.href = "dashboard.html";
 }
+
+// Make functions available to HTML buttons
+window.toggleMode = toggleMode;
+window.login = login;
