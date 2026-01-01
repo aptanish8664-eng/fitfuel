@@ -266,20 +266,25 @@ async function calculateCalories() {
   if (goal === "lose") calories -= 400;
   if (goal === "gain") calories += 300;
 
-  // --- SUPABASE INTEGRATION ---
-  const { data: { user } } = await supabase.auth.getUser(); // Get current user id
+const userEmail = sessionStorage.getItem("activeUser");
 
+  if (!userEmail) {
+    output.innerHTML = `<p class="text-red-500">Error: No active session found. Please login.</p>`;
+    return;
+  }
+
+  // 2. Perform the upsert using the email as the ID
   const { error } = await supabase
     .from('profiles')
     .upsert({ 
-      id: user.id, 
+      id: userEmail, // Use the email from sessionStorage
       goal, gender, age, height, weight, activity, calories,
       updated_at: new Date()
     });
 
   if (error) {
-    console.error("Supabase Error:", error);
-    output.innerHTML = `<p class="text-red-500">Error saving data.</p>`;
+    console.error("Supabase Error:", error.message);
+    output.innerHTML = `<p class="text-red-500">Error saving data: ${error.message}</p>`;
   } else {
     output.innerHTML = `
       <div class="p-6 bg-zinc-900 rounded-2xl interactive-card">
@@ -292,16 +297,21 @@ async function calculateCalories() {
 }
 
 async function restoreProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+ const userEmail = sessionStorage.getItem("activeUser");
+  if (!userEmail) return;
 
+  // Update the greeting UI
+  const userSpan = document.querySelector("h1 span");
+  if (userSpan) userSpan.innerText = userEmail.split('@')[0];
+
+  // Fetch the user's data using their email
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', user.id)
+    .eq('id', userEmail)
     .single();
 
-  if (data) {
+  if (data && !error) {
     document.getElementById("goal").value = data.goal || "";
     document.getElementById("gender").value = data.gender || "";
     document.getElementById("age").value = data.age || "";
@@ -445,30 +455,23 @@ async function processReport(event) {
 }
 
 // ---------- DIET ----------
-function initDiet() {
-  const user = sessionStorage.getItem("activeUser");
-  const users = JSON.parse(localStorage.getItem("users")) || {};
-  const profile = users[user]?.profile;
-  const reportText = users[user]?.report?.summary?.toLowerCase() || "";
-  const dietType = users[user]?.dietType || "veg";
+// ---------- DIET ----------
+async function initDiet() {
+  const userEmail = sessionStorage.getItem("activeUser");
+  if (!userEmail) return;
 
-  // Set diet type selector
-  setTimeout(() => {
-    const select = document.getElementById("diet-type");
-    if (select) {
-      select.value = dietType;
-      select.onchange = () => {
-        users[user].dietType = select.value;
-        localStorage.setItem("users", JSON.stringify(users));
-        regenerateDiet(profile, reportText, select.value);
-      };
-    }
-  }, 0);
+  // 1. Fetch the latest profile from Supabase
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userEmail)
+    .single();
 
   const warning = document.getElementById("diet-warning");
   const content = document.getElementById("diet-content");
 
-  if (!profile?.calories) {
+  // Check if calories exist in the cloud profile
+  if (!profile || !profile.calories) {
     warning?.classList.remove("hidden");
     content?.classList.add("hidden");
     return;
@@ -476,6 +479,25 @@ function initDiet() {
 
   warning?.classList.add("hidden");
   content?.classList.remove("hidden");
+
+  // Get report data and preference from your local user storage
+  const users = JSON.parse(localStorage.getItem("users")) || {};
+  const reportText = users[userEmail]?.report?.summary?.toLowerCase() || "";
+  const dietType = users[userEmail]?.dietType || "veg";
+
+  // Set diet type selector
+  setTimeout(() => {
+    const select = document.getElementById("diet-type");
+    if (select) {
+      select.value = dietType;
+      select.onchange = () => {
+        if (!users[userEmail]) users[userEmail] = {};
+        users[userEmail].dietType = select.value;
+        localStorage.setItem("users", JSON.stringify(users));
+        regenerateDiet(profile, reportText, select.value);
+      };
+    }
+  }, 0);
 
   const calories = profile.calories;
   const proteinG = Math.round((calories * 0.3) / 4);
@@ -487,7 +509,7 @@ function initDiet() {
   document.getElementById("carbs-g").innerText = carbsG;
   document.getElementById("fat-g").innerText = fatG;
 
-  // ---------- FOOD LOGIC ----------
+  // ---------- FOOD LOGIC (YOUR ORIGINAL LOGIC) ----------
   const prefer = {
     veg: ["Spinach", "Lentils", "Chickpeas", "Oats"],
     egg: ["Boiled eggs", "Egg omelette"],
@@ -528,17 +550,14 @@ function initDiet() {
   // ---------- AI DIET PLAN ----------
   (async () => {
     try {
-      if (!users[user].dietPlan || !users[user].dietPlan.breakfast) {
+      if (!users[userEmail]?.dietPlan || !users[userEmail]?.dietPlan.breakfast) {
         const aiDiet = await generateAIDiet(profile, reportText, dietType);
-        users[user].dietPlan = aiDiet;
+        users[userEmail].dietPlan = aiDiet;
         localStorage.setItem("users", JSON.stringify(users));
       }
-
-      renderAIDiet(users[user].dietPlan);
-
+      renderAIDiet(users[userEmail].dietPlan);
     } catch (err) {
       console.error("Diet AI failed:", err);
-      // Fallback to basic meal plan
       renderBasicMealPlan(calories);
     }
   })();
@@ -569,7 +588,7 @@ function initDiet() {
 }
 
 async function regenerateDiet(profile, reportText, dietType) {
-  const user = sessionStorage.getItem("activeUser");
+  const userEmail = sessionStorage.getItem("activeUser");
   const users = JSON.parse(localStorage.getItem("users")) || {};
 
   const mealBox = document.getElementById("meal-plan");
@@ -579,7 +598,8 @@ async function regenerateDiet(profile, reportText, dietType) {
 
   try {
     const aiDiet = await generateAIDiet(profile, reportText, dietType);
-    users[user].dietPlan = aiDiet;
+    if (!users[userEmail]) users[userEmail] = {};
+    users[userEmail].dietPlan = aiDiet;
     localStorage.setItem("users", JSON.stringify(users));
     renderAIDiet(aiDiet);
   } catch (err) {
