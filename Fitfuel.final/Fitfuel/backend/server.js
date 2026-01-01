@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path"); 
 const cors = require("cors");
 const OpenAI = require("openai");
 
@@ -40,6 +41,38 @@ app.post("/chat", async (req, res) => {
     console.error("❌ OPENAI ERROR:", err.message);
     res.status(500).json({ reply: "OpenAI request failed." });
   }
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.html"));
+});
+
+app.get("/login-particles.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "login-particles.js"));
+});
+
+app.get("/smooth-scroll.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "smooth-scroll.js"));
+});
+
+app.get("/styles.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "styles.css"));
+});
+
+app.get("/login.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "login.html"));
+});
+
+app.get("/dashboard.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.html")); 
+});
+
+app.get("/dashboard.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.js")); 
+});
+
+app.get("/landing-script.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "landing-script.js"));
 });
 
 app.listen(3000, () => {
