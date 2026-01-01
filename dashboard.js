@@ -547,11 +547,22 @@ async function initDiet() {
   if (foodsPrefer) foodsPrefer.innerHTML = renderFood(prefer);
   if (foodsAvoid) foodsAvoid.innerHTML = renderFood(avoid);
 
-  // ---------- AI DIET PLAN ----------
+// ---------- AI DIET PLAN ----------
   (async () => {
     try {
-      if (!users[userEmail]?.dietPlan || !users[userEmail]?.dietPlan.breakfast) {
+      // FIX: Ensure the user object exists in the local users map first
+      if (!users[userEmail]) {
+        users[userEmail] = {
+          dietPlan: null,
+          dietType: dietType || "veg",
+          report: null
+        };
+      }
+
+      if (!users[userEmail].dietPlan || !users[userEmail].dietPlan.breakfast) {
         const aiDiet = await generateAIDiet(profile, reportText, dietType);
+        
+        // Now it is safe to set dietPlan because we initialized users[userEmail] above
         users[userEmail].dietPlan = aiDiet;
         localStorage.setItem("users", JSON.stringify(users));
       }
@@ -598,8 +609,15 @@ async function regenerateDiet(profile, reportText, dietType) {
 
   try {
     const aiDiet = await generateAIDiet(profile, reportText, dietType);
-    if (!users[userEmail]) users[userEmail] = {};
+    
+    // FIX: Ensure the user object exists before setting the plan
+    if (!users[userEmail]) {
+        users[userEmail] = {};
+    }
+    
     users[userEmail].dietPlan = aiDiet;
+    users[userEmail].dietType = dietType; // Also sync the new type
+    
     localStorage.setItem("users", JSON.stringify(users));
     renderAIDiet(aiDiet);
   } catch (err) {
