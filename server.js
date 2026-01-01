@@ -8,6 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(__dirname));
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
@@ -47,6 +48,42 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+app.get("/auth.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "auth.html"));
+});
+
+app.get("/auth.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "auth.js"));
+});
+
+app.get("/background-animations.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "background-animations.js"));
+});
+
+app.get("/dashboard.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.html")); 
+});
+
+app.get("/dashboard.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.js")); 
+});
+
+app.get("/gsap-animations.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "gsap-animations.js"));
+});
+
+app.get("/index.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/landing-script.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "landing-script.js"));
+});
+
+app.get("/landing.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "landing.html"));
+});
+
 app.get("/login-particles.js", (req, res) => {
   res.sendFile(path.join(__dirname, "login-particles.js"));
 });
@@ -63,17 +100,7 @@ app.get("/login.html", (req, res) => {
   res.sendFile(path.join(__dirname, "login.html"));
 });
 
-app.get("/dashboard.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard.html")); 
-});
 
-app.get("/dashboard.js", (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard.js")); 
-});
-
-app.get("/landing-script.js", (req, res) => {
-  res.sendFile(path.join(__dirname, "landing-script.js"));
-});
 
 
 
