@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fitfuel | Dashboard</title>
+
+  <!-- Fonts (Add these) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Racing+Sans+One&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- Make sure these files exist in your project -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Add this new file -->
+  <script src="background-animations.js"></script>
+
+  <!-- Protect dashboard -->
+  <script>
+    if (!sessionStorage.getItem("activeUser")) {
+      window.location.href = "index.html";
+    }
+  </script>
+  
+  <style>
+    /* Add this inline style temporarily to test */
+    body {
+      overflow: hidden;
+    }
+    #display {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  </style>
+</head>
+
+<body class="bg-[#050505] text-[#f3f3f3] flex h-screen overflow-hidden">
+
+<!-- SIDEBAR -->
+<aside class="w-64 bg-[#0a0a0a] border-r border-zinc-800 p-6 flex flex-col">
+  <div class="text-2xl font-bold mb-10 font-['Orbitron']">
+    FIT<span class="text-[#ccff00]">FUEL</span>.
+  </div>
+
+  <nav class="flex-grow space-y-2">
+    <button onclick="switchTab('home')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-zinc-800 transition-colors">🏠 Home</button>
+    <button onclick="switchTab('reports')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-zinc-800 transition-colors">📊 Reports</button>
+    <button onclick="switchTab('diet')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-zinc-800 transition-colors">🍽️ Diet</button>
+    <button onclick="switchTab('workout')" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-zinc-800 transition-colors">💪 Workout</button>
+  </nav>
+
+  <button onclick="sessionStorage.clear(); location.href='index.html'"
+    class="text-zinc-500 hover:text-red-500 mt-6 p-3 rounded-lg hover:bg-red-900/20 transition-colors">
+    🚪 Logout
+  </button>
+</aside>
+
+  <!-- MAIN -->
+  <main id="display" class="flex-grow p-10 overflow-y-auto"></main>
+
+  <!-- CHAT TRIGGER -->
+  <div id="chat-trigger"
+       onclick="toggleChat()"
+       class="fixed bottom-6 right-6 w-14 h-14 bg-[#ccff00] rounded-full
+              flex items-center justify-center cursor-pointer shadow-lg z-[9999]">
+    <i data-lucide="bot" class="text-black"></i>
+  </div>
+
+  <!-- CHAT WINDOW -->
+  <div id="chat-window"
+       class="fixed bottom-24 right-6 w-80 h-96 bg-zinc-900 border
+              border-zinc-800 rounded-2xl hidden flex-col shadow-2xl z-[9999]">
+
+    <div class="p-4 border-b border-zinc-800 flex justify-between">
+      <span class="font-bold text-[#ccff00]">Fitfuel AI</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chat-messages"
+         class="flex-grow p-4 overflow-y-auto space-y-3 text-sm">
+      <div class="bg-zinc-800 p-2 rounded-lg">
+        Hello. How can I help you today?
+      </div>
+    </div>
+
+    <div class="p-3 border-t border-zinc-800 flex gap-2">
+      <input id="chat-input"
+             type="text"
+             placeholder="Ask me anything..."
+             class="w-full bg-black border border-zinc-700 rounded-lg p-2 text-xs
+                    focus:outline-none focus:border-[#ccff00]" />
+
+      <button onclick="sendChatMessage()"
+              class="bg-[#ccff00] text-black px-3 py-1 rounded-lg font-bold">
+        ↑
+      </button>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

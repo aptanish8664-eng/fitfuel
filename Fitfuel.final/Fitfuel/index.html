@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitFuel | AI-Powered Fitness Revolution</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Racing+Sans+One&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- AOS Animation Library -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+  
+  <style>
+    /* Custom Styles */
+    :root {
+      --primary: #ccff00;
+      --dark: #050505;
+      --accent: #ff4d4d;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: white;
+      overflow-x: hidden;
+    }
+    
+    .racing-font {
+      font-family: 'Racing Sans One', cursive;
+    }
+    
+    .orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+    
+    /* Hero Image Styles */
+    .hero-image-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 1;
+    }
+    
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        rgba(5, 5, 5, 0.8) 0%,
+        rgba(5, 5, 5, 0.6) 30%,
+        rgba(5, 5, 5, 0.4) 60%,
+        rgba(5, 5, 5, 0.9) 100%);
+      z-index: 2;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      margin-top: -100vh;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Review Carousel */
+    .review-carousel {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .review-track {
+      display: flex;
+      transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .review-slide {
+      flex: 0 0 100%;
+      padding: 0 15px;
+    }
+    
+    /* Carousel Controls */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(204, 255, 0, 0.2);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+    
+    .carousel-btn:hover {
+      background: var(--primary);
+      color: var(--dark);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .carousel-btn.prev {
+      left: -25px;
+    }
+    
+    .carousel-btn.next {
+      right: -25px;
+    }
+    
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .carousel-dot.active {
+      background: var(--primary);
+      transform: scale(1.2);
+    }
+    
+    /* Glass Morphism */
+    .glass {
+      background: rgba(10, 10, 10, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Hover Line Animation */
+    .hover-line {
+      position: relative;
+    }
+    
+    .hover-line::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -5px;
+      left: 0;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    .hover-line:hover::after {
+      width: 100%;
+    }
+    
+    /* Gradient Text */
+    .gradient-text {
+      background: linear-gradient(45deg, var(--primary), #00ff88, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% auto;
+    }
+    
+    /* 3D Card */
+    .card-3d {
+      transform-style: preserve-3d;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .card-3d:hover {
+      transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+      box-shadow: 0 25px 50px rgba(204, 255, 0, 0.2);
+    }
+    
+    /* Fitness Images */
+    .fitness-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 15px;
+      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .fitness-img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Founder Image */
+    .founder-img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      transition: all 0.4s ease;
+    }
+    
+    .founder-img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(204, 255, 0, 0.3);
+    }
+  </style>
+</head>
+<body class="relative overflow-x-hidden">
+  
+  <!-- Particle Background -->
+  <div id="particles-js"></div>
+  
+  <!-- Navigation -->
+  <nav class="fixed w-full z-50 py-6 px-8 glass">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="text-3xl font-bold orbitron">
+        FIT<span class="text-[#ccff00]">FUEL</span>
+      </div>
+      
+      <div class="hidden md:flex space-x-8">
+        <a href="#home" class="hover-line text-white hover:text-[#ccff00] transition-colors orbitron">HOME</a>
+        <a href="#about" class="hover-line text-white hover:text-[#ccff00] transition-colors orbitron">ABOUT</a>
+        <a href="#services" class="hover-line text-white hover:text-[#ccff00] transition-colors orbitron">SERVICES</a>
+        <a href="#reviews" class="hover-line text-white hover:text-[#ccff00] transition-colors orbitron">REVIEWS</a>
+        <a href="#contact" class="hover-line text-white hover:text-[#ccff00] transition-colors orbitron">CONTACT</a>
+      </div>
+      
+      <a href="login.html" class="bg-[#ccff00] text-black px-6 py-2 rounded-full font-bold orbitron hover:scale-105 transition-transform">
+        GET STARTED
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Image -->
+  <div class="hero-image-container" id="home">
+    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+         alt="FitFuel Hero - Modern Gym Fitness Center" 
+         class="hero-image">
+    <div class="hero-overlay"></div>
+  </div>
+
+  <!-- Hero Content -->
+  <section class="hero-content">
+    <div class="container mx-auto px-6 relative z-10 text-center">
+      <div class="reveal-text">
+        <h1 class="text-6xl md:text-8xl font-bold mb-6 orbitron">
+          <span><span>REVOLUTIONIZE</span></span><br>
+          <span><span>YOUR</span></span> <span class="text-[#ccff00]"><span>FITNESS</span></span>
+        </h1>
+      </div>
+      
+      <p id="hero-subtitle" class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto opacity-80">
+        AI-powered precision training, personalized nutrition, and medical-grade insights in one platform.
+      </p>
+      
+      <div class="flex flex-col md:flex-row gap-6 justify-center">
+        <a href="login.html" class="btn-3d bg-[#ccff00] text-black px-10 py-4 rounded-full text-xl font-bold orbitron hover:scale-105 transition-transform flex items-center justify-center gap-3">
+          <i class="fas fa-rocket"></i>
+          LAUNCH DASHBOARD
+        </a>
+        
+        <a href="#services" class="btn-3d border-2 border-[#ccff00] text-[#ccff00] px-10 py-4 rounded-full text-xl font-bold orbitron hover:bg-[#ccff00] hover:text-black transition-all flex items-center justify-center gap-3">
+          <i class="fas fa-play"></i>
+          WATCH DEMO
+        </a>
+      </div>
+      
+      <!-- Stats Counter -->
+      <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-5xl font-bold text-[#ccff00] mb-2" data-count="12500">0</div>
+          <div class="text-gray-400">ACTIVE MEMBERS</div>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl font-bold text-[#ccff00] mb-2" data-count="8920">0</div>
+          <div class="text-gray-400">AI ANALYSES</div>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl font-bold text-[#ccff00] mb-2" data-count="94">0</div>
+          <div class="text-gray-400">SUCCESS RATE</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10">
+      <a href="#about" class="mouse-scroll">
+        <div class="mouse">
+          <div class="wheel"></div>
+        </div>
+        <div class="arrows">
+          <span class="arrow"></span>
+          <span class="arrow"></span>
+          <span class="arrow"></span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-20 relative bg-[#050505]">
+    <div class="container mx-auto px-6">
+      <h2 class="glitch text-5xl font-bold mb-4 orbitron text-center" data-text="THE FITFUEL STORY">
+        THE <span class="text-[#ccff00]">FITFUEL</span> STORY
+      </h2>
+      
+      <p class="text-xl text-center mb-16 max-w-3xl mx-auto opacity-80">
+        Born from the intersection of cutting-edge AI technology and elite athletic training methodologies.
+      </p>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="space-y-8">
+          <div class="glass p-8 rounded-2xl interactive-card stagger-item">
+            <div class="text-4xl text-[#ccff00] mb-4">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-3 orbitron">OUR MISSION</h3>
+            <p class="opacity-80">
+              To democratize elite fitness coaching through artificial intelligence, making personalized training and nutrition accessible to everyone.
+            </p>
+          </div>
+          
+          <div class="glass p-8 rounded-2xl interactive-card stagger-item">
+            <div class="text-4xl text-[#ccff00] mb-4">
+              <i class="fas fa-eye"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-3 orbitron">OUR VISION</h3>
+            <p class="opacity-80">
+              Creating a world where everyone has access to medical-grade fitness guidance, eliminating guesswork from health optimization.
+            </p>
+          </div>
+        </div>
+        
+        <div class="relative parallax-container">
+          <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+               alt="AI Fitness Technology" 
+               class="fitness-img">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-20 bg-gradient-to-b from-black to-gray-900 relative">
+    <div class="container mx-auto px-6">
+      <h2 class="text-5xl font-bold mb-4 orbitron text-center">
+        <span class="text-[#ccff00]">PRECISION</span> SERVICES
+      </h2>
+      
+      <p class="text-xl text-center mb-16 max-w-3xl mx-auto opacity-80">
+        Next-generation fitness technology powered by artificial intelligence.
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Service 1 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">AI CALORIE CALCULATOR</h3>
+          <p class="opacity-80 mb-6">
+            Advanced TDEE calculation with adaptive learning based on your metabolism and fitness goals.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- Service 2 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-file-medical"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">MEDICAL REPORT ANALYSIS</h3>
+          <p class="opacity-80 mb-6">
+            OCR-powered medical report scanning with AI insights for personalized health recommendations.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- Service 3 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">PERSONALIZED DIET PROTOCOLS</h3>
+          <p class="opacity-80 mb-6">
+            Custom meal plans with macronutrient tracking and food recommendations based on your medical profile.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- Service 4 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-running"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">TRAINING MATRIX</h3>
+          <p class="opacity-80 mb-6">
+            Adaptive workout plans for calisthenics or gym training with real-time form correction guidance.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- Service 5 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">HEALTH MONITORING</h3>
+          <p class="opacity-80 mb-6">
+            Continuous health tracking with predictive analytics and early warning systems.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- Service 6 -->
+        <div class="service-card glass p-8 rounded-2xl interactive-card card-3d">
+          <div class="text-5xl text-[#ccff00] mb-6">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 orbitron">24/7 AI COACH</h3>
+          <p class="opacity-80 mb-6">
+            Conversational AI assistant for instant answers to fitness, nutrition, and health queries.
+          </p>
+          <div class="flex items-center text-[#ccff00]">
+            <span class="mr-2">Learn More</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- Reviews Section with Carousel -->
+  <section id="reviews" class="py-20 bg-gradient-to-t from-black to-gray-900 relative">
+    <div class="container mx-auto px-6">
+      <h2 class="text-5xl font-bold mb-4 orbitron text-center">
+        <span class="text-[#ccff00]">CLIENT</span> SUCCESS STORIES
+      </h2>
+      
+      <p class="text-xl text-center mb-16 max-w-3xl mx-auto opacity-80">
+        Transforming lives with AI-powered fitness innovation.
+      </p>
+      
+      <!-- Review Carousel -->
+      <div class="review-carousel relative max-w-4xl mx-auto">
+        <!-- Carousel Controls -->
+        <button class="carousel-btn prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <button class="carousel-btn next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <!-- Review Track -->
+        <div class="review-track" id="review-track">
+          <!-- Reviews will be generated dynamically -->
+        </div>
+        
+        <!-- Carousel Dots -->
+        <div class="carousel-dots" id="carousel-dots">
+          <!-- Dots will be generated dynamically -->
+        </div>
+      </div>
+      
+      <!-- Auto-play Toggle -->
+      <div class="flex justify-center items-center mt-8 space-x-4">
+        <span class="text-gray-400">Auto-rotate:</span>
+        <button id="autoplay-toggle" class="w-14 h-8 bg-gray-700 rounded-full p-1 relative">
+          <div class="toggle-circle w-6 h-6 bg-[#ccff00] rounded-full transition-transform duration-300"></div>
+        </button>
+        <span id="autoplay-status" class="text-[#ccff00]">ON</span>
+      </div>
+      
+      <!-- Review Stats -->
+      <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center glass p-6 rounded-2xl">
+          <div class="text-4xl font-bold text-[#ccff00] mb-2">4.9/5</div>
+          <div class="text-gray-400">AVERAGE RATING</div>
+        </div>
+        
+        <div class="text-center glass p-6 rounded-2xl">
+          <div class="text-4xl font-bold text-[#ccff00] mb-2">2,500+</div>
+          <div class="text-gray-400">TRANSFORMATIONS</div>
+        </div>
+        
+        <div class="text-center glass p-6 rounded-2xl">
+          <div class="text-4xl font-bold text-[#ccff00] mb-2">98%</div>
+          <div class="text-gray-400">SATISFACTION RATE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 relative overflow-hidden bg-[#050505]">
+    <div class="container mx-auto px-6">
+      <h2 class="text-5xl font-bold mb-4 orbitron text-center">
+        <span class="text-[#ccff00]">GET IN</span> TOUCH
+      </h2>
+      
+      <p class="text-xl text-center mb-16 max-w-3xl mx-auto opacity-80">
+        Ready to revolutionize your fitness journey? Contact us for a personalized demo.
+      </p>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Contact Form -->
+        <div class="glass p-8 rounded-2xl">
+          <h3 class="text-3xl font-bold mb-8 orbitron">SEND US A MESSAGE</h3>
+          
+          <form id="contact-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="block text-gray-400 mb-2">First Name</label>
+                <input type="text" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 focus:outline-none focus:border-[#ccff00] transition-colors" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="block text-gray-400 mb-2">Last Name</label>
+                <input type="text" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 focus:outline-none focus:border-[#ccff00] transition-colors" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-gray-400 mb-2">Email</label>
+              <input type="email" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 focus:outline-none focus:border-[#ccff00] transition-colors" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-gray-400 mb-2">Fitness Goal</label>
+              <select class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 focus:outline-none focus:border-[#ccff00] transition-colors">
+                <option value="">Select your goal</option>
+                <option value="weight-loss">Weight Loss</option>
+                <option value="muscle-gain">Muscle Gain</option>
+                <option value="performance">Performance Enhancement</option>
+                <option value="recovery">Injury Recovery</option>
+                <option value="maintenance">General Fitness</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-gray-400 mb-2">Message</label>
+              <textarea rows="5" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 focus:outline-none focus:border-[#ccff00] transition-colors" required></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-[#ccff00] text-black py-4 rounded-xl font-bold orbitron text-lg hover:scale-105 transition-transform">
+              <i class="fas fa-paper-plane mr-2"></i>
+              SEND MESSAGE
+            </button>
+          </form>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="space-y-8">
+          <div class="glass p-8 rounded-2xl interactive-card">
+            <div class="flex items-start space-x-4">
+              <div class="text-3xl text-[#ccff00]">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold mb-2 orbitron">HEADQUARTERS</h4>
+                <p class="opacity-80">BMS COLLEGE OF ENGINEERING<br>Basavangudi, Bengaluru 560004</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass p-8 rounded-2xl interactive-card">
+            <div class="flex items-start space-x-4">
+              <div class="text-3xl text-[#ccff00]">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold mb-2 orbitron">CONTACT</h4>
+                <p class="opacity-80">+91 86605 80558<br>hello@fitfuel.ai</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass p-8 rounded-2xl interactive-card">
+            <div class="flex items-start space-x-4">
+              <div class="text-3xl text-[#ccff00]">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold mb-2 orbitron">OPERATING HOURS</h4>
+                <p class="opacity-80">24/7 AI Support<br>Human Support: 9AM - 6PM PST</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Fitness Center Image -->
+          <div class="glass p-8 rounded-2xl">
+            <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                 alt="Fitness Center" 
+                 class="w-full h-48 object-cover rounded-xl">
+          </div>
+          
+          <!-- Social Media -->
+          <div class="flex space-x-6">
+            <a href="#" class="social-icon w-14 h-14 rounded-full bg-gray-900 flex items-center justify-center hover:bg-[#ccff00] hover:text-black transition-all">
+              <i class="fab fa-twitter text-xl"></i>
+            </a>
+            <a href="#" class="social-icon w-14 h-14 rounded-full bg-gray-900 flex items-center justify-center hover:bg-[#ccff00] hover:text-black transition-all">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+            <a href="#" class="social-icon w-14 h-14 rounded-full bg-gray-900 flex items-center justify-center hover:bg-[#ccff00] hover:text-black transition-all">
+              <i class="fab fa-linkedin text-xl"></i>
+            </a>
+            <a href="#" class="social-icon w-14 h-14 rounded-full bg-gray-900 flex items-center justify-center hover:bg-[#ccff00] hover:text-black transition-all">
+              <i class="fab fa-youtube text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-gray-800 bg-black">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="text-3xl font-bold orbitron mb-6 md:mb-0">
+          FIT<span class="text-[#ccff00]">FUEL</span>
+        </div>
+        
+        <div class="flex space-x-8 mb-6 md:mb-0">
+          <a href="#home" class="footer-link text-gray-400 hover:text-[#ccff00] transition-colors">Home</a>
+          <a href="#about" class="footer-link text-gray-400 hover:text-[#ccff00] transition-colors">About</a>
+          <a href="#services" class="footer-link text-gray-400 hover:text-[#ccff00] transition-colors">Services</a>
+          <a href="#reviews" class="footer-link text-gray-400 hover:text-[#ccff00] transition-colors">Reviews</a>
+          <a href="#contact" class="footer-link text-gray-400 hover:text-[#ccff00] transition-colors">Contact</a>
+        </div>
+        
+        <div class="text-gray-400 text-sm">
+          © 2024 FitFuel AI. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="landing-script.js"></script>
+</body>
+</html>

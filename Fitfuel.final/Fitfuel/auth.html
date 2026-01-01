@@ -1,0 +1,17 @@
+<body class="bg-[#050505] text-white font-body flex items-center justify-center h-screen">
+    <div class="w-full max-w-md p-8 bg-[#0a0a0a] border border-gray-800 rounded-3xl">
+        <h2 id="auth-title" class="text-3xl font-display font-bold mb-6">INITIALIZE <span class="text-brand-neon">ACCESS</span></h2>
+        
+        <form id="auth-form" class="space-y-4">
+            <input type="text" id="username" placeholder="Username" class="w-full bg-brand-gray p-4 rounded-xl border border-gray-800 focus:border-brand-neon outline-none" required>
+            <input type="password" id="password" placeholder="Access Key (Password)" class="w-full bg-brand-gray p-4 rounded-xl border border-gray-800 focus:border-brand-neon outline-none" required>
+            <button type="submit" class="w-full bg-brand-neon text-black font-bold py-4 rounded-full hover:scale-105 transition-all">START OPTIMIZATION</button>
+        </form>
+        
+        <p class="mt-6 text-center text-gray-500 text-sm">
+            <span id="toggle-msg">Don't have an account?</span> 
+            <button onclick="toggleAuth()" class="text-brand-neon font-bold">Switch Mode</button>
+        </p>
+    </div>
+    <script src="auth.js"></script>
+</body>
