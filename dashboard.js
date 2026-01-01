@@ -548,25 +548,31 @@ async function initDiet() {
   if (foodsAvoid) foodsAvoid.innerHTML = renderFood(avoid);
 
 // ---------- AI DIET PLAN ----------
+  // ---------- AI DIET PLAN ----------
   (async () => {
     try {
-      // FIX: Ensure the user object exists in the local users map first
+      // 1. Check if the user entry exists in localStorage
       if (!users[userEmail]) {
         users[userEmail] = {
           dietPlan: null,
           dietType: dietType || "veg",
           report: null
         };
+        // Initialize the object so the next line doesn't crash
+        localStorage.setItem("users", JSON.stringify(users));
       }
 
+      // 2. Only generate if a plan doesn't already exist
       if (!users[userEmail].dietPlan || !users[userEmail].dietPlan.breakfast) {
         const aiDiet = await generateAIDiet(profile, reportText, dietType);
         
-        // Now it is safe to set dietPlan because we initialized users[userEmail] above
+        // 3. Now it is safe to set dietPlan because users[userEmail] is defined
         users[userEmail].dietPlan = aiDiet;
         localStorage.setItem("users", JSON.stringify(users));
       }
+      
       renderAIDiet(users[userEmail].dietPlan);
+
     } catch (err) {
       console.error("Diet AI failed:", err);
       renderBasicMealPlan(calories);
@@ -752,21 +758,31 @@ function renderBasicMealPlan(calories) {
 }
 
 // ---------- WORKOUT ----------
-function initWorkout() {
-  const user = sessionStorage.getItem("activeUser");
-  const users = JSON.parse(localStorage.getItem("users")) || {};
-  const profile = users[user]?.profile;
-  const report = users[user]?.report;
+async function initWorkout() {
+  const userEmail = sessionStorage.getItem("activeUser");
+  if (!userEmail) return;
+
+  // 1. Fetch the latest profile from Supabase instead of localStorage
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userEmail)
+    .single();
 
   const typeSelect = document.getElementById("workout-type");
   const planBox = document.getElementById("workout-plan");
   const cardioBox = document.getElementById("cardio-plan");
   const warningList = document.getElementById("workout-warnings");
 
-  if (!profile) {
-    if (planBox) planBox.innerHTML = "<p class='text-zinc-400'>Calculate calories first.</p>";
+  // 2. Check if the profile exists in the cloud
+  if (!profile || !profile.calories) {
+    if (planBox) planBox.innerHTML = "<p class='text-zinc-400'>Calculate calories first in the Home tab.</p>";
     return;
   }
+
+  // Get legacy data for medical reports if still stored locally
+  const users = JSON.parse(localStorage.getItem("users")) || {};
+  const report = users[userEmail]?.report;
 
   // --- WORKOUT DATABASE ---
   const workoutDB = {
@@ -828,7 +844,7 @@ function initWorkout() {
     { day: "Sunday", type: "rest", label: "FULL REST" }
   ];
 
-  // --- RENDER WORKOUT ---
+  // --- RENDER WORKOUT FUNCTION ---
   function renderWorkout(mode) {
     const data = workoutDB[mode];
     if (!planBox) return;
@@ -882,7 +898,7 @@ function initWorkout() {
     typeSelect.onchange = e => renderWorkout(e.target.value);
   }
 
-  // --- CARDIO ---
+  // --- CARDIO LOGIC ---
   let cardio = `
     <ul class="space-y-2">
       <li class="flex items-start gap-2">
@@ -906,7 +922,7 @@ function initWorkout() {
   }
   if (cardioBox) cardioBox.innerHTML = cardio;
 
-  // --- WARNINGS ---
+  // --- SAFETY WARNINGS ---
   if (warningList) {
     warningList.innerHTML = "";
     if (report?.summary) {
