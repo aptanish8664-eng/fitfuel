@@ -44,7 +44,7 @@ app.post("/chat", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/login-particles.js", (req, res) => {
